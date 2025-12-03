@@ -15,15 +15,12 @@
         }
 
         body {
-          max-width: 600px;
-            margin: 0 auto;
             font-family: 'Lora', 'Merriweather', Georgia, serif;
-            background: #f5f3f0 url('bg.jpg') center center / cover no-repeat fixed;
-            background-attachment: fixed;
-            border: 2px solid #6b8fa3;
-            padding: 40px 30px;
-            position: relative;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
+            background: #f5f3f0;
+            color: #1a1a1a;
+            line-height: 1.8;
+            padding: 20px;
+            min-height: 100vh;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
@@ -32,8 +29,8 @@
             max-width: 600px;
             margin: 0 auto;
             font-family: 'Lora', 'Merriweather', Georgia, serif;
-            background: #f5f3f0 url('bg.jpg') center center / cover no-repeat fixed;
-            background-attachment: fixed;
+            background: #f5f3f0 url('bg.jpg') center center / cover no-repeat;
+            background-attachment: scroll;
             border: 2px solid #6b8fa3;
             padding: 40px 30px;
             position: relative;
@@ -353,6 +350,14 @@
             .container {
                 padding: 25px 20px;
                 border-width: 2px;
+                background-size: cover;
+                background-position: center center;
+                background-attachment: scroll;
+                min-height: 100vh;
+            }
+            
+            .container::before {
+                background: rgba(255, 255, 255, 0.8);
             }
 
             .cover-title {
