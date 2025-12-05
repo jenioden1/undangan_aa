@@ -1,146 +1,116 @@
-const heroButton = document.getElementById("openInvitation");
-const loader = document.getElementById("loader");
-const bgm = document.getElementById("bgm");
-const musicToggle = document.getElementById("musicToggle");
-const darkToggle = document.getElementById("darkModeToggle");
-const lightbox = document.getElementById("lightbox");
-const lightboxImg = lightbox.querySelector("img");
-const lightboxClose = lightbox.querySelector(".lightbox-close");
-const galleryItems = document.querySelectorAll(".gallery-item");
-const countdownDate = new Date("2025-12-20T09:00:00+07:00").getTime();
-const form = document.getElementById("rsvpForm");
-const formFeedback = document.getElementById("formFeedback");
-const shareBtn = document.getElementById("shareWa");
-const floatingContainer = document.querySelector(".floating-florals");
-
-let musicPlaying = false;
-
-const floralColors = ["rgba(212,175,55,0.4)", "rgba(245,212,215,0.5)", "rgba(255,255,255,0.3)"];
-function generateFlorals(amount = 12) {
-  for (let i = 0; i < amount; i += 1) {
-    const span = document.createElement("span");
-    span.style.left = `${Math.random() * 100}%`;
-    span.style.bottom = `${Math.random() * 100}px`;
-    span.style.backgroundColor = floralColors[i % floralColors.length];
-    span.style.animationDelay = `${Math.random() * 10}s`;
-    span.style.animationDuration = `${18 + Math.random() * 10}s`;
-    floatingContainer.appendChild(span);
-  }
-}
-
-function hideLoader() {
-  loader.classList.add("hide");
-  setTimeout(() => loader.remove(), 600);
-}
-
-window.addEventListener("load", () => {
-  setTimeout(hideLoader, 1200);
-  generateFlorals();
-});
-
-function startMusic() {
-  bgm.play().then(() => {
-    musicPlaying = true;
-    musicToggle.querySelector(".label").textContent = "Jeda Musik";
-  });
-}
-
-heroButton.addEventListener("click", () => {
-  document.querySelector("#pembuka").scrollIntoView({ behavior: "smooth" });
-  if (!musicPlaying) {
-    startMusic();
-  }
-});
-
-musicToggle.addEventListener("click", () => {
-  if (musicPlaying) {
-    bgm.pause();
-    musicToggle.querySelector(".label").textContent = "Putar Musik";
-  } else {
-    startMusic();
-  }
-  musicPlaying = !musicPlaying;
-});
-
-darkToggle.addEventListener("click", () => {
-  document.body.classList.toggle("dark");
-});
-
-function countdownTick() {
-  const now = Date.now();
-  const difference = countdownDate - now;
-  const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-  const minutes = Math.floor((difference / (1000 * 60)) % 60);
-  const seconds = Math.floor((difference / 1000) % 60);
-  document.getElementById("days").textContent = String(days).padStart(2, "0");
-  document.getElementById("hours").textContent = String(hours).padStart(2, "0");
-  document.getElementById("minutes").textContent = String(minutes).padStart(2, "0");
-  document.getElementById("seconds").textContent = String(seconds).padStart(2, "0");
-  if (difference < 0) {
-    document.querySelector(".countdown-timer").textContent = "Acara telah berlangsung. Terima kasih atas doa Anda.";
-    clearInterval(countdownInterval);
-  }
-}
-
-const countdownInterval = setInterval(countdownTick, 1000);
-countdownTick();
-
-// Section reveal animations
-const observer = new IntersectionObserver(
-  entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("visible");
-        observer.unobserve(entry.target);
-      }
+// Fungsi untuk scroll ke halaman detail
+function scrollToDetail() {
+    document.getElementById('detail').scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
     });
-  },
-  { threshold: 0.2 }
-);
+}
 
-document.querySelectorAll(".fade-left, .fade-right, .slide-up").forEach(el => observer.observe(el));
+// Fungsi untuk memformat nama (mengubah underscore menjadi spasi dan kapitalisasi)
+function formatName(name) {
+    if (!name) return null;
+    
+    try {
+        name = decodeURIComponent(name);
+    } catch (e) {
+        // Jika decode gagal, gunakan nama asli
+    }
+    
+    // Ganti underscore (_) dengan spasi
+    name = name
+        .replace(/_/g, ' ')
+        .replace(/[-+]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    
+    // Kapitalisasi setiap kata
+    return name
+        .split(' ')
+        .map(word => {
+            if (word.length === 0) return '';
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        })
+        .join(' ');
+}
 
-// Lightbox
-galleryItems.forEach(item => {
-  item.addEventListener("click", () => {
-    lightboxImg.src = item.src;
-    lightbox.classList.add("open");
-  });
-});
+// Fungsi untuk membaca nama tamu dari hash URL
+function getGuestNameFromURL() {
+    // Prioritas 1: Hash URL (index.html#jeni atau index.html#jeni_adi_hidayat)
+    const hash = window.location.hash;
+    if (hash && hash.length > 1) {
+        const hashName = hash.substring(1); // Hapus karakter #
+        if (hashName) {
+            return formatName(hashName);
+        }
+    }
+    
+    // Prioritas 2: Query parameter (index.html?nama=jeni)
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryName = urlParams.get('nama');
+    if (queryName) {
+        return formatName(queryName);
+    }
+    
+    return null;
+}
 
-lightboxClose.addEventListener("click", () => lightbox.classList.remove("open"));
-lightbox.addEventListener("click", e => {
-  if (e.target === lightbox) lightbox.classList.remove("open");
-});
+// Fungsi untuk menampilkan nama tamu
+function displayGuestName() {
+    const namaTamuElement = document.getElementById('nama-tamu');
+    if (!namaTamuElement) return;
+    
+    const guestName = getGuestNameFromURL();
+    
+    if (guestName) {
+        namaTamuElement.textContent = guestName;
+    } else {
+        namaTamuElement.textContent = 'Bapak/Ibu/Saudara/i';
+    }
+}
 
-// RSVP submit
-form.addEventListener("submit", async e => {
-  e.preventDefault();
-  const formData = new FormData(form);
-  const payload = Object.fromEntries(formData);
-  payload.timestamp = new Date().toISOString();
-  formFeedback.textContent = "Mengirim data...";
-  try {
-    const scriptURL = "https://script.google.com/macros/s/YOUR-SCRIPT-ID/exec";
-    const response = await fetch(scriptURL, {
-      method: "POST",
-      body: JSON.stringify(payload),
-      headers: { "Content-Type": "application/json" }
+// Smooth scroll behavior untuk semua anchor links
+document.addEventListener('DOMContentLoaded', function() {
+    // Tampilkan nama tamu saat halaman dimuat
+    displayGuestName();
+    
+    // Smooth scrolling
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
     });
-    if (!response.ok) throw new Error("Network error");
-    formFeedback.textContent = "Terima kasih! Konfirmasi Anda tersimpan.";
-    form.reset();
-  } catch (error) {
-    localStorage.setItem("rsvpBackup", JSON.stringify(payload));
-    formFeedback.textContent = "Berhasil disimpan secara lokal. Periksa koneksi Anda.";
-  }
+
+    // Add fade-in animation on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe sections for animation
+    const sections = document.querySelectorAll('.cover-page, .detail-page');
+    sections.forEach(section => {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(section);
+    });
 });
 
-shareBtn.addEventListener("click", () => {
-  const text = encodeURIComponent(
-    `Halo! Kami mengundang Anda ke pernikahan Yuli & Eful pada 20 Desember 2025 di Parung Lesang, Banjar. Detail lengkap ada di tautan berikut: https://contoh-undangan.com`
-  );
-  window.open(`https://wa.me/?text=${text}`, "_blank");
-});
-
+// Update nama tamu saat hash berubah (untuk navigasi tanpa reload)
+window.addEventListener('hashchange', displayGuestName);

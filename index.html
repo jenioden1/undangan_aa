@@ -1,565 +1,124 @@
 <!DOCTYPE html>
 <html lang="id">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Undangan Pernikahan | Yuli & Eful</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lora:wght@400;600;700&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Lora', 'Merriweather', Georgia, serif;
-            background: #f5f3f0;
-            color: #1a1a1a;
-            line-height: 1.8;
-            padding: 20px;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            font-family: 'Lora', 'Merriweather', Georgia, serif;
-            background: #f5f3f0 url('bg.jpg') center center / cover no-repeat;
-            background-attachment: scroll;
-            border: 2px solid #6b8fa3;
-            padding: 40px 30px;
-            position: relative;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.06);
-        }
-
-        .container::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.75);
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .container > * {
-            position: relative;
-            z-index: 1;
-        }
-
-        /* Cover Section */
-        .cover {
-            text-align: center;
-            padding: 40px 20px 60px;
-            position: relative;
-            min-height: 70vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .cover-title {
-            font-family: 'Great Vibes', cursive;
-            font-size: 3.5rem;
-            color: #0d4a7a;
-            margin-bottom: 20px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.08);
-            font-weight: 400;
-        }
-
-        .cover-date {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #1a1a1a;
-            letter-spacing: 2px;
-            margin-bottom: 30px;
-            text-transform: uppercase;
-        }
-
-        .cover-invitation {
-            font-size: 1.05rem;
-            color: #1a1a1a;
-            margin-bottom: 30px;
-            font-weight: 600;
-        }
-
-        .cover-verse {
-            font-style: italic;
-            color: #2d2d2d;
-            margin: 30px 0;
-            padding: 0 20px;
-            line-height: 1.9;
-            font-size: 1.05rem;
-        }
-
-        .cover-verse-source {
-            font-size: 0.95rem;
-            color: #2d2d2d;
-            margin-top: 10px;
-            font-weight: 600;
-        }
-
-        .cover-bottom {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            margin-top: 50px;
-            position: relative;
-        }
-
-        .qr-box {
-            flex: 0 0 auto;
-            text-align: center;
-            padding: 15px;
-            border: 2px solid #8ba5b8;
-            background: #ffffff;
-        }
-
-        .qr-box-title {
-            font-size: 0.8rem;
-            color: #1a1a1a;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .qr-placeholder {
-            width: 120px;
-            height: 120px;
-            border: 2px solid #7a7a7a;
-            background: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 8px;
-            position: relative;
-        }
-
-        .qr-placeholder::before {
-            content: '';
-            width: 90%;
-            height: 90%;
-            border: 2px solid #7a7a7a;
-        }
-
-        .qr-placeholder::after {
-            content: 'QR';
-            position: absolute;
-            font-size: 0.7rem;
-            color: #333;
-            font-weight: 600;
-        }
-
-        .qr-label {
-            font-size: 0.75rem;
-            color: #1a1a1a;
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .leaf-decoration {
-            width: 150px;
-            height: 150px;
-            background: linear-gradient(135deg, rgba(107, 143, 163, 0.18) 0%, rgba(139, 165, 184, 0.25) 100%);
-            border-radius: 50% 0 50% 50%;
-            position: absolute;
-            right: -30px;
-            bottom: -30px;
-            opacity: 0.45;
-        }
-
-        .leaf-decoration::before {
-            content: '';
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(135deg, rgba(107, 143, 163, 0.12) 0%, rgba(139, 165, 184, 0.2) 100%);
-            border-radius: 50% 0 50% 50%;
-            position: absolute;
-            top: 20px;
-            left: 20px;
-        }
-
-        /* Content Section */
-        .content {
-            padding: 50px 20px 40px;
-            border-top: 2px dashed #8ba5b8;
-            margin-top: 30px;
-            position: relative;
-        }
-
-        .content-greeting {
-            text-align: center;
-            font-size: 1.3rem;
-            color: #1a1a1a;
-            margin-bottom: 30px;
-            font-weight: 700;
-        }
-
-        .content-text {
-            text-align: justify;
-            color: #1a1a1a;
-            margin-bottom: 25px;
-            font-size: 1.1rem;
-            line-height: 1.9;
-            font-weight: 400;
-        }
-
-        .guest-name {
-            text-align: center;
-            margin: 30px 0;
-            font-size: 1.15rem;
-            color: #1a1a1a;
-        }
-
-        .guest-name-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-        }
-
-        .guest-name-value {
-            font-weight: 700;
-            color: #0d4a7a;
-            font-size: 1.3rem;
-        }
-
-        .couple-info {
-            margin: 30px 0;
-            text-align: center;
-        }
-
-        .couple-name {
-            font-size: 1.15rem;
-            color: #1a1a1a;
-            margin: 8px 0;
-            line-height: 1.8;
-            font-weight: 600;
-        }
-
-        .event-details {
-            margin: 40px 0;
-            text-align: center;
-        }
-
-        .event-date {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #1a1a1a;
-            letter-spacing: 2px;
-            margin-bottom: 25px;
-            text-transform: uppercase;
-        }
-
-        .event-table {
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-        }
-
-        .event-table td {
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #d0d0d0;
-            color: #1a1a1a;
-            font-size: 1.05rem;
-        }
-
-        .event-table td:first-child {
-            font-weight: 700;
-            color: #0d4a7a;
-            width: 40%;
-        }
-
-        .event-address {
-            margin: 30px 0;
-            text-align: center;
-            color: #1a1a1a;
-            line-height: 1.9;
-            font-size: 1.1rem;
-            font-weight: 400;
-        }
-
-        .closing {
-            text-align: center;
-            margin: 40px 0 30px;
-            color: #1a1a1a;
-            line-height: 1.9;
-            font-size: 1.1rem;
-        }
-
-        .signature {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 30px;
-            border-top: 1px solid #d0d0d0;
-        }
-
-        .signature-family {
-            font-size: 1.1rem;
-            color: #1a1a1a;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .signature-couple {
-            font-family: 'Great Vibes', cursive;
-            font-size: 2.2rem;
-            color: #0d4a7a;
-            margin-top: 10px;
-            font-weight: 400;
-        }
-
-        .leaf-left {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, rgba(107, 143, 163, 0.18) 0%, rgba(139, 165, 184, 0.25) 100%);
-            border-radius: 50% 50% 0 50%;
-            position: absolute;
-            left: -25px;
-            bottom: -25px;
-            opacity: 0.45;
-        }
-
-        .leaf-right {
-            width: 120px;
-            height: 120px;
-            background: linear-gradient(135deg, rgba(107, 143, 163, 0.18) 0%, rgba(139, 165, 184, 0.25) 100%);
-            border-radius: 0 50% 50% 50%;
-            position: absolute;
-            right: -25px;
-            bottom: -25px;
-            opacity: 0.45;
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
-
-            .container {
-                padding: 25px 20px;
-                border-width: 2px;
-                background-size: cover;
-                background-position: center center;
-                background-attachment: scroll;
-                min-height: 100vh;
-            }
-            
-            .container::before {
-                background: rgba(255, 255, 255, 0.8);
-            }
-
-            .cover-title {
-                font-size: 2.5rem;
-            }
-
-            .cover-date {
-                font-size: 0.95rem;
-            }
-
-            .cover {
-                min-height: 60vh;
-                padding: 30px 15px 50px;
-            }
-
-            .cover-bottom {
-                flex-direction: column;
-                align-items: center;
-                gap: 30px;
-            }
-
-            .leaf-decoration {
-                position: relative;
-                right: auto;
-                bottom: auto;
-                margin: 20px auto 0;
-            }
-
-            .content {
-                padding: 40px 15px 30px;
-            }
-
-            .leaf-left,
-            .leaf-right {
-                display: none;
-            }
-
-            .event-table {
-                font-size: 0.95rem;
-            }
-
-            .event-table td {
-                padding: 10px 12px;
-            }
-        }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-        <!-- Cover / Halaman Depan -->
-        <div class="cover">
-            <h1 class="cover-title">Yuli & Eful</h1>
-            <p class="cover-date">SABTU, 20 DESEMBER 2025</p>
-            <p class="cover-invitation">Turut Mengundang : Segenap keluarga</p>
-            
-            <div class="cover-verse">
-                <p>Dan di antara tanda-tanda kekuasaan-Nya ialah Dia menciptakan untukmu pasangan-pasangan dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang.</p>
-                <p class="cover-verse-source">(QS. Ar-Rum ayat 21)</p>
-    </div>
-
-            <div class="cover-bottom">
-                <div class="qr-box">
-                    <div class="qr-box-title">SCAN MAPS DI SINI</div>
-                    <div class="qr-placeholder"></div>
-                    <div class="qr-label">BARCODE LOKASI</div>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lora:wght@400;600;700&family=Merriweather:wght@400;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Halaman Cover / Depan -->
+    <section class="cover-page" id="cover">
+        <div class="cover-container">
+            <div class="cover-content">
+                <h1 class="cover-couple-name">Yuli & Eful</h1>
+                <p class="cover-date">SABTU, 20 DESEMBER 2025</p>
+                <p class="cover-invite-text">Turut Mengundang : Segenap keluarga</p>
+                
+                <div class="cover-verse">
+                    <p>Di antara tanda-tanda (kebesaran)-Nya ialah bahwa</p>
+                    <p>Dia menciptakan pasangan-pasangan untukmu dari (jenis) dirimu sendiri</p>
+                    <p>agar kamu merasa tenteram kepadanya.</p>
+                    <p>Dia menjadikan di antaramu rasa cinta dan kasih sayang.</p>
+                    <p>Sesungguhnya pada yang demikian itu</p>
+                    <p>benar-benar terdapat tanda-tanda (kebesaran Allah)</p>
+                    <p>bagi kaum yang berpikir.</p>
+                    <p class="verse-source">(QS. Ar Rum ayat 21)</p>
                 </div>
-                <div class="leaf-decoration"></div>
+
+                <div class="cover-footer">
+                    <div class="qr-section">
+                        <p class="qr-title">SCAN MAPS DISINI</p>
+                        <div class="qr-code-placeholder">
+                            <img src="barcode.png" alt="Barcode Lokasi" class="qr-code-img">
+                        </div>
+                        <p class="qr-label">BARCODE LOKASI</p>
+                    </div>
+                    <div class="cover-floral-decoration"></div>
+                </div>
+            </div>
+            <!-- Dekorasi Floral Section Cover -->
+            <img src="section1-kiriatas.png" alt="Floral decoration" class="cover-floral-top-left">
+            <img src="section1-kananbawah.png" alt="Floral decoration" class="cover-floral-bottom-right">
         </div>
-        </div>
+        <button class="scroll-down" onclick="scrollToDetail()">
+            <span>↓</span>
+        </button>
+    </section>
 
-        <!-- Isi Undangan -->
-        <div class="content">
-            <div class="leaf-left"></div>
-            <div class="leaf-right"></div>
+    <!-- Halaman Detail -->
+    <section class="detail-page" id="detail">
+        <div class="detail-container">
+            <div class="detail-content">
+                <p class="greeting">Assalamu'alaikum Warahmatullahi Wabarakatuh</p>
 
-            <p class="content-greeting">Assalamu'alaikum Warahmatullahi Wabarakatuh</p>
+                <div class="guest-name-section">
+                    <p class="guest-name-label">Kepada Yth.</p>
+                    <p class="guest-name-value" id="nama-tamu">Bapak/Ibu/Saudara/i</p>
+                </div>
 
-            <div class="guest-name">
-                <span class="guest-name-label">Kepada Yth.</span>
-                <span class="guest-name-label">Bapak/Ibu/Saudara/i</span>
-                <span class="guest-name-value" id="nama-tamu">Bapak/Ibu/Saudara/i</span>
-        </div>
+                <p class="intro-text">
+                    Dengan memohon ridho dan rahmat Allah SWT, kami bermaksud menyelenggarakan pernikahan putra-putri kami :
+                </p>
 
-            <p class="content-text">
-          Dengan memohon ridho dan rahmat Allah SWT, kami bermaksud menyelenggarakan pernikahan putra-putri kami. Kehadiran dan doa restu Bapak/Ibu/Saudara/i akan menjadi kebahagiaan untuk kami sekeluarga.
-        </p>
+                <div class="bride-section">
+                    <h2 class="bride-name">Yulian Tenger Karisma, S. Pd.</h2>
+                    <p class="bride-parents">Putri pertama dari Bpk. Iceng Kasiran dan Ibu Yoyok Supriatin, S.Pd.</p>
+                </div>
 
-            <div class="couple-info">
-                <p class="couple-name">Yulian Tenger Karisma, S.Pd.<br>putri dari Bpk. Iceng Kasiran & Ibu Yoyok Supriatin, S.Pd.</p>
-                <p class="couple-name" style="margin-top: 20px;">Saeful Rohman, S.E.<br>putra dari Bpk. Rukman Hermawan (Alm) & Ibu Hj. Rustini</p>
-        </div>
+                <p class="connector">dengan</p>
 
-            <div class="event-details">
+                <div class="groom-section">
+                    <h2 class="groom-name">Saeful Rohman, S. E.</h2>
+                    <p class="groom-parents">Putra pertama dari Bpk. Rukman Hermawan (Alm) dan Ibu Hj. Rustini</p>
+                </div>
+
+                <p class="event-intro">yang Insya Allah akan di selenggarakan pada :</p>
+
                 <p class="event-date">SABTU, 20 DESEMBER 2025</p>
-                <table class="event-table">
-                    <tr>
-                        <td>AKAD NIKAH</td>
-                        <td>: Pukul 09.00 WIB</td>
-                    </tr>
-                    <tr>
-                        <td>RESEPSI</td>
-                        <td>: Pukul 10.00 WIB</td>
-                    </tr>
-                </table>
+
+                <div class="event-times">
+                    <div class="time-item">
+                        <span class="time-label">AKAD NIKAH</span>
+                        <span class="time-separator">:</span>
+                        <span class="time-value">Pukul : 09.00 WIB</span>
+                    </div>
+                    <div class="time-divider"></div>
+                    <div class="time-item">
+                        <span class="time-label">RESEPSI</span>
+                        <span class="time-separator">:</span>
+                        <span class="time-value">Pukul : 10.00 WIB</span>
+                    </div>
+                </div>
+
+                <p class="location-label">Bertempat di :</p>
+                <p class="location-address">Parung Lesang Rt 05 Rw 09 Kel. Banjar kec. Banjar</p>
+
+                <p class="thank-you">
+                    Atas kehadiran dan do'a restu Bapak/Ibu/Saudara/i kami ucapkan terima kasih
+                </p>
+
+                <p class="closing-greeting">Wassalamu'alaikum Warahmatullahi Wabarakatuh</p>
+
+                <div class="family-signature">
+                    <p>Kami yang berbahagia,</p>
+                    <p>Kel. Bpk. Iceng Kasiran dan Ibu Yoyok Supriatin, S.Pd.</p>
+                    <p>Kel. Bpk. Rukman Hermawan (Alm) dan Ibu Hj. Rustini</p>
+                </div>
+
+                <p class="couple-signature">Yuli & Eful</p>
             </div>
-
-            <p class="event-address">
-                Parung Lesang RT 05 RW 09<br>
-                Kel. Banjar, Kec. Banjar<br>
-                Jawa Barat
-            </p>
-
-            <p class="closing">
-                Atas kehadiran dan doa restu Bapak/Ibu/Saudara/i, kami ucapkan terima kasih. Semoga Allah SWT senantiasa melimpahkan rahmat dan berkah-Nya kepada kita semua.
-            </p>
-
-            <div class="signature">
-                <p class="signature-family">Keluarga Besar</p>
-                <p class="signature-couple">Yuli & Eful</p>
-            </div>
+            
+            <!-- Dekorasi Floral Section Detail -->
+            <img src="section2-atastengah.png" alt="Floral decoration" class="detail-floral-top-center">
+            <img src="section2-kananbawah.png" alt="Floral decoration" class="detail-floral-bottom-right">
+            <img src="section3-kiribawah.png" alt="Floral decoration" class="detail-floral-bottom-left">
         </div>
-        </div>
+    </section>
 
-    <script>
-        // Fungsi untuk memformat nama (menangani berbagai separator dan kapitalisasi)
-        function formatName(name) {
-            if (!name) return null;
-            
-            // Decode URL encoding terlebih dahulu (untuk %20, dll)
-            try {
-                name = decodeURIComponent(name);
-            } catch (e) {
-                // Jika decode gagal, gunakan nama asli
-            }
-            
-            // Ganti berbagai separator dengan spasi
-            // Menangani: -, +, _, dan spasi ganda
-            name = name
-                .replace(/[-+_]/g, ' ')  // Ganti dash, plus, underscore dengan spasi
-                .replace(/\s+/g, ' ')    // Ganti spasi ganda dengan spasi tunggal
-                .trim();                  // Hapus spasi di awal dan akhir
-            
-            // Kapitalisasi setiap kata
-            return name
-                .split(' ')
-                .map(word => {
-                    if (word.length === 0) return '';
-                    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                })
-                .join(' ');
-        }
-
-        // Fungsi untuk membaca nama tamu dari URL
-        function getGuestNameFromURL() {
-            // 1. Cek query parameter (bekerja untuk file lokal dan web server)
-            // Contoh: index.html?nama=jeni-adi-hidayat atau index.html?nama=jeni+adi+hidayat
-            const urlParams = new URLSearchParams(window.location.search);
-            const queryName = urlParams.get('nama');
-            if (queryName) {
-                return formatName(queryName);
-            }
-
-            // 2. Cek hash fragment (bekerja untuk file lokal dan web server)
-            // Contoh: index.html#jeni-adi-hidayat atau index.html#jeni+adi+hidayat
-            const hash = window.location.hash;
-            if (hash && hash.length > 1) {
-                const hashName = hash.substring(1); // Hapus karakter #
-                if (hashName) {
-                    return formatName(hashName);
-                }
-            }
-
-            // 3. Cek pathname (hanya bekerja untuk web server, bukan file://)
-            // Contoh: index.html/jeni-adi-hidayat
-            const pathname = window.location.pathname;
-            const segments = pathname.split('/').filter(segment => segment && segment !== 'index.html');
-            
-            if (segments.length > 0) {
-                const nameSegment = segments[segments.length - 1];
-                return formatName(nameSegment);
-            }
-            
-            return null;
-        }
-
-        // Tampilkan nama tamu
-        function displayGuestName() {
-            const namaTamuElement = document.getElementById('nama-tamu');
-            const guestName = getGuestNameFromURL();
-            
-            if (guestName) {
-                namaTamuElement.textContent = guestName;
-            } else {
-                namaTamuElement.textContent = 'Bapak/Ibu/Saudara/i';
-            }
-        }
-
-        // Jalankan saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', displayGuestName);
-        
-        // Update juga saat hash berubah (untuk navigasi dalam halaman yang sama)
-        window.addEventListener('hashchange', displayGuestName);
-    </script>
-  </body>
+    <script src="script.js"></script>
+</body>
 </html>
