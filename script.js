@@ -128,3 +128,66 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Update nama tamu saat hash berubah (untuk navigasi tanpa reload)
 window.addEventListener('hashchange', displayGuestName);
+
+// Fungsi untuk memutar background music
+function playBackgroundMusic() {
+    const audio = document.getElementById('background-music');
+    if (audio) {
+        audio.volume = 0.5; // Set volume ke 50% agar tidak terlalu keras
+        const playPromise = audio.play();
+        
+        // Handle promise jika browser memblokir autoplay
+        if (playPromise !== undefined) {
+            playPromise
+                .then(() => {
+                    // Audio berhasil diputar
+                    console.log('Background music started');
+                })
+                .catch(error => {
+                    // Autoplay diblokir, akan dicoba lagi saat user berinteraksi
+                    console.log('Autoplay blocked, will try again on user interaction');
+                });
+        }
+    }
+}
+
+// Coba putar audio saat halaman dimuat
+document.addEventListener('DOMContentLoaded', function() {
+    const audio = document.getElementById('background-music');
+    
+    if (audio) {
+        // Pastikan audio akan looping
+        audio.loop = true;
+        
+        // Event listener untuk memastikan audio tetap looping jika berhenti
+        audio.addEventListener('ended', function() {
+            audio.currentTime = 0;
+            audio.play().catch(error => {
+                console.log('Error restarting music:', error);
+            });
+        });
+        
+        // Coba putar audio langsung
+        playBackgroundMusic();
+        
+        // Jika autoplay diblokir, coba lagi saat user berinteraksi
+        let musicStarted = false;
+        const startMusicOnInteraction = function() {
+            if (!musicStarted) {
+                if (audio && audio.paused) {
+                    playBackgroundMusic();
+                    musicStarted = true;
+                    // Hapus event listener setelah musik mulai
+                    document.removeEventListener('click', startMusicOnInteraction);
+                    document.removeEventListener('scroll', startMusicOnInteraction);
+                    document.removeEventListener('touchstart', startMusicOnInteraction);
+                }
+            }
+        };
+        
+        // Coba putar saat user klik, scroll, atau touch
+        document.addEventListener('click', startMusicOnInteraction, { once: true });
+        document.addEventListener('scroll', startMusicOnInteraction, { once: true });
+        document.addEventListener('touchstart', startMusicOnInteraction, { once: true });
+    }
+});
