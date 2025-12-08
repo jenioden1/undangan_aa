@@ -23,11 +23,25 @@ function formatName(name) {
         .replace(/\s+/g, ' ')
         .trim();
     
-    // Kapitalisasi setiap kata
+    // Kapitalisasi setiap kata, dengan pengecualian untuk gelar akademik
     return name
         .split(' ')
         .map(word => {
             if (word.length === 0) return '';
+            
+            // Deteksi gelar akademik (pattern: huruf tunggal diikuti titik dan huruf, contoh: S.E, S.Kom, S.Pd)
+            // Pattern: [A-Za-z]\.[A-Za-z]+ (contoh: S.E, S.Kom, S.Pd, dll)
+            const degreePattern = /^([A-Za-z])\.([A-Za-z]+)$/;
+            
+            const degreeMatch = word.match(degreePattern);
+            if (degreeMatch) {
+                // Jika adalah gelar, pastikan huruf pertama kapital, sisanya sesuai yang diketik
+                const firstLetter = degreeMatch[1].toUpperCase();
+                const afterDot = degreeMatch[2]; // Pertahankan format asli setelah titik
+                return firstLetter + '.' + afterDot;
+            }
+            
+            // Untuk kata biasa, kapitalisasi normal
             return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
         })
         .join(' ');
