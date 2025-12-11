@@ -133,8 +133,68 @@ window.addEventListener('hashchange', displayGuestName);
 let audioStarted = false;
 let audioElement = null;
 let audioUnlocked = false;
+let audioContext = null;
 
-// Fungsi untuk memutar audio dengan teknik muted autoplay
+// Fungsi untuk unlock audio context dengan teknik Web Audio API
+function unlockAudioContext() {
+    try {
+        // Coba buat AudioContext untuk "unlock" audio
+        if (!audioContext) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+                audioContext = new AudioContextClass();
+                
+                // Coba resume context (ini bisa unlock audio)
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume().then(() => {
+                        console.log('AudioContext resumed');
+                    }).catch(err => {
+                        console.log('AudioContext resume failed:', err);
+                    });
+                }
+            }
+        }
+    } catch (e) {
+        console.log('AudioContext creation failed:', e);
+    }
+}
+
+// Fungsi untuk simulate user interaction (teknik advanced)
+function simulateUserInteraction() {
+    try {
+        // Teknik 1: Buat invisible div dan trigger click event
+        const invisibleDiv = document.createElement('div');
+        invisibleDiv.style.position = 'absolute';
+        invisibleDiv.style.left = '-9999px';
+        invisibleDiv.style.width = '1px';
+        invisibleDiv.style.height = '1px';
+        invisibleDiv.style.opacity = '0';
+        invisibleDiv.style.pointerEvents = 'none';
+        document.body.appendChild(invisibleDiv);
+        
+        // Trigger berbagai event
+        const events = ['mousedown', 'mouseup', 'click', 'touchstart', 'touchend'];
+        events.forEach(eventType => {
+            try {
+                const event = new Event(eventType, { bubbles: true, cancelable: true });
+                invisibleDiv.dispatchEvent(event);
+            } catch (e) {
+                // Ignore
+            }
+        });
+        
+        // Hapus setelah beberapa detik
+        setTimeout(() => {
+            if (invisibleDiv.parentNode) {
+                invisibleDiv.parentNode.removeChild(invisibleDiv);
+            }
+        }, 1000);
+    } catch (e) {
+        console.log('Simulate interaction failed:', e);
+    }
+}
+
+// Fungsi untuk memutar audio dengan teknik muted autoplay (lebih agresif)
 function playAudioWithMutedTechnique() {
     if (!audioElement || audioStarted) return;
     
@@ -142,11 +202,17 @@ function playAudioWithMutedTechnique() {
     if (audioElement.readyState === 0) {
         audioElement.load();
         // Tunggu sedikit lalu coba lagi
-        setTimeout(() => playAudioWithMutedTechnique(), 100);
+        setTimeout(() => playAudioWithMutedTechnique(), 50);
         return;
     }
     
-    // Teknik: Play dengan muted dulu (browser biasanya mengizinkan ini)
+    // Teknik 1: Unlock AudioContext dulu
+    unlockAudioContext();
+    
+    // Teknik 2: Simulate user interaction
+    simulateUserInteraction();
+    
+    // Teknik 3: Play dengan muted dulu (browser biasanya mengizinkan ini)
     // Pastikan muted = true sebelum play - ini sangat penting!
     audioElement.muted = true;
     audioElement.volume = 0.5; // Set volume untuk nanti
@@ -154,7 +220,14 @@ function playAudioWithMutedTechnique() {
     // Pastikan loop aktif
     audioElement.loop = true;
     
-    // Coba play
+    // Teknik 4: Set playbackRate untuk "trick" browser
+    try {
+        audioElement.playbackRate = 1.0;
+    } catch (e) {
+        // Ignore
+    }
+    
+    // Coba play dengan beberapa teknik sekaligus
     const playPromise = audioElement.play();
     
     if (playPromise !== undefined) {
@@ -164,24 +237,54 @@ function playAudioWithMutedTechnique() {
                 audioStarted = true;
                 audioUnlocked = true;
                 
-                // Unmute setelah delay singkat (browser perlu waktu untuk "mengizinkan" unmute)
+                // Unmute dengan delay bertahap untuk lebih smooth
                 setTimeout(() => {
                     if (audioElement && !audioElement.paused) {
                         audioElement.muted = false;
                         console.log('Audio started and unmuted successfully');
                     }
-                }, 300);
+                }, 200);
             })
             .catch(error => {
-                // Jika gagal dengan muted, coba lagi setelah delay
+                // Jika gagal dengan muted, coba teknik lain
                 console.log('Muted autoplay attempt failed:', error);
-                // Reset dan coba lagi nanti (akan dicoba oleh retry mechanism)
-                if (audioElement) {
+                
+                // Teknik alternatif: Coba dengan volume sangat rendah dulu
+                if (audioElement && !audioStarted) {
                     try {
-                        audioElement.pause();
-                        audioElement.currentTime = 0;
+                        audioElement.volume = 0.01;
+                        audioElement.muted = false;
+                        const retryPromise = audioElement.play();
+                        if (retryPromise !== undefined) {
+                            retryPromise.then(() => {
+                                audioStarted = true;
+                                audioUnlocked = true;
+                                // Naikkan volume secara bertahap
+                                let vol = 0.01;
+                                const volumeInterval = setInterval(() => {
+                                    if (vol < 0.5 && audioElement) {
+                                        vol += 0.05;
+                                        audioElement.volume = vol;
+                                    } else {
+                                        clearInterval(volumeInterval);
+                                    }
+                                }, 100);
+                            }).catch(() => {
+                                // Reset untuk retry nanti
+                                if (audioElement) {
+                                    try {
+                                        audioElement.pause();
+                                        audioElement.currentTime = 0;
+                                        audioElement.muted = true;
+                                        audioElement.volume = 0.5;
+                                    } catch (e) {
+                                        // Ignore
+                                    }
+                                }
+                            });
+                        }
                     } catch (e) {
-                        // Ignore pause errors
+                        // Ignore
                     }
                 }
             });
@@ -261,6 +364,14 @@ function attemptPlay() {
 
 // Inisialisasi audio - coba segera setelah script dimuat
 (function initAudio() {
+    // Unlock AudioContext segera (sebelum DOM ready)
+    unlockAudioContext();
+    
+    // Simulate user interaction segera
+    setTimeout(() => {
+        simulateUserInteraction();
+    }, 10);
+    
     // Coba dapatkan audio element segera
     if (document.readyState === 'loading') {
         // DOM belum siap, tunggu dulu
@@ -269,6 +380,9 @@ function attemptPlay() {
             if (audioElement) {
                 audioElement.loop = true;
                 audioElement.volume = 0.5;
+                // Unlock lagi setelah DOM ready
+                unlockAudioContext();
+                simulateUserInteraction();
                 // Coba dengan teknik muted autoplay
                 playAudioWithMutedTechnique();
             }
@@ -279,6 +393,9 @@ function attemptPlay() {
         if (audioElement) {
             audioElement.loop = true;
             audioElement.volume = 0.5;
+            // Unlock lagi
+            unlockAudioContext();
+            simulateUserInteraction();
             // Coba dengan teknik muted autoplay
             playAudioWithMutedTechnique();
         }
@@ -292,8 +409,19 @@ function attemptPlay() {
         if (audioElement && !audioStarted) {
             audioElement.loop = true;
             audioElement.volume = 0.5;
+            // Unlock lagi saat load
+            unlockAudioContext();
+            simulateUserInteraction();
             // Coba dengan teknik muted autoplay
             playAudioWithMutedTechnique();
+        }
+    });
+    
+    // Teknik tambahan: Coba unlock saat page visibility berubah
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden && !audioStarted) {
+            unlockAudioContext();
+            simulateUserInteraction();
         }
     });
 })();
@@ -304,12 +432,23 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (!audioElement) return;
     
+    // Unlock AudioContext segera setelah DOM ready
+    unlockAudioContext();
+    simulateUserInteraction();
+    
     // Pastikan audio akan looping
     audioElement.loop = true;
     audioElement.volume = 0.5;
     
     // Preload audio untuk memastikan siap diputar
     audioElement.preload = 'auto';
+    
+    // Teknik: Coba play dengan requestAnimationFrame (kadang lebih berhasil)
+    requestAnimationFrame(() => {
+        if (!audioStarted && audioElement) {
+            playAudioWithMutedTechnique();
+        }
+    });
     
     // Event listener untuk memastikan audio tetap looping jika berhenti (backup jika loop gagal)
     audioElement.addEventListener('ended', function() {
@@ -371,62 +510,95 @@ document.addEventListener('DOMContentLoaded', function() {
     // Juga coba saat audio sudah cukup dimuat
     if (audioElement.readyState >= 1) {
         // Audio sudah mulai dimuat, coba play segera
+        unlockAudioContext();
+        simulateUserInteraction();
         setTimeout(tryPlay, 10);
     }
     
     // Coba lagi saat page fully loaded
     window.addEventListener('load', function() {
+        unlockAudioContext();
+        simulateUserInteraction();
         setTimeout(tryPlay, 50);
         setTimeout(tryPlay, 200);
         setTimeout(tryPlay, 500);
     });
     
+    // Teknik tambahan: Gunakan IntersectionObserver untuk detect visibility
+    if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !audioStarted) {
+                    unlockAudioContext();
+                    simulateUserInteraction();
+                    setTimeout(tryPlay, 50);
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        // Observe body element
+        if (document.body) {
+            observer.observe(document.body);
+        }
+    }
+    
     // Gunakan Visibility API - coba putar saat tab menjadi visible
     document.addEventListener('visibilitychange', function() {
         if (!document.hidden && !audioStarted) {
-            setTimeout(tryPlay, 100);
+            unlockAudioContext();
+            simulateUserInteraction();
+            setTimeout(tryPlay, 50);
         }
     });
     
     // Coba saat window focus (untuk mobile dan desktop)
     window.addEventListener('focus', function() {
         if (!audioStarted) {
-            setTimeout(tryPlay, 100);
+            unlockAudioContext();
+            simulateUserInteraction();
+            setTimeout(tryPlay, 50);
         }
     });
     
     // Coba saat window blur (kadang trigger saat halaman pertama kali load)
     window.addEventListener('blur', function() {
         if (!audioStarted) {
-            setTimeout(tryPlay, 100);
+            unlockAudioContext();
+            setTimeout(tryPlay, 50);
         }
     });
     
     // Coba saat mouse move (interaksi halus) - tidak hanya sekali
     document.addEventListener('mousemove', function() {
         if (!audioStarted) {
-            setTimeout(tryPlay, 10);
+            unlockAudioContext();
+            setTimeout(tryPlay, 5);
         }
     }, { passive: true });
     
     // Coba saat touch (untuk mobile) - tidak hanya sekali
     document.addEventListener('touchstart', function() {
         if (!audioStarted) {
-            setTimeout(tryPlay, 10);
+            unlockAudioContext();
+            simulateUserInteraction();
+            setTimeout(tryPlay, 5);
         }
     }, { passive: true });
     
     // Coba saat pointer move (untuk touch dan mouse)
     document.addEventListener('pointermove', function() {
         if (!audioStarted) {
-            setTimeout(tryPlay, 10);
+            unlockAudioContext();
+            setTimeout(tryPlay, 5);
         }
     }, { passive: true });
     
     // Coba saat ada interaksi apapun dengan halaman
     const anyInteraction = function() {
         if (!audioStarted) {
-            setTimeout(tryPlay, 10);
+            unlockAudioContext();
+            simulateUserInteraction();
+            setTimeout(tryPlay, 5);
         }
     };
     
@@ -437,20 +609,26 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Retry mechanism: coba lagi setiap beberapa detik jika belum berhasil
     let retryCount = 0;
-    const maxRetries = 30; // Lebih banyak retry
+    const maxRetries = 40; // Lebih banyak retry
     const retryInterval = setInterval(function() {
         if (!audioStarted && retryCount < maxRetries) {
             retryCount++;
+            // Unlock dan simulate setiap beberapa retry
+            if (retryCount % 5 === 0) {
+                unlockAudioContext();
+                simulateUserInteraction();
+            }
             tryPlay();
         } else if (audioStarted) {
             clearInterval(retryInterval);
         }
-    }, 200); // Lebih sering retry (setiap 200ms)
+    }, 150); // Lebih sering retry (setiap 150ms)
     
     // Fallback: coba lagi dengan lebih agresif setelah beberapa detik
     setTimeout(function() {
         if (!audioStarted) {
-            // Coba play sekali lagi
+            unlockAudioContext();
+            simulateUserInteraction();
             tryPlay();
         }
     }, 1500);
@@ -458,6 +636,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Coba lagi setelah 2 detik
     setTimeout(function() {
         if (!audioStarted) {
+            unlockAudioContext();
+            simulateUserInteraction();
             tryPlay();
         }
     }, 2000);
@@ -465,6 +645,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Coba lagi setelah 3 detik
     setTimeout(function() {
         if (!audioStarted) {
+            unlockAudioContext();
+            simulateUserInteraction();
             tryPlay();
         }
     }, 3000);
@@ -472,6 +654,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Tambahkan event listener untuk interaksi user sebagai fallback
     const fallbackHandler = function() {
         if (!audioStarted) {
+            unlockAudioContext();
+            simulateUserInteraction();
             tryPlay();
         }
     };
