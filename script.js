@@ -133,45 +133,6 @@ window.addEventListener('hashchange', displayGuestName);
 let audioStarted = false;
 let audioElement = null;
 let audioUnlocked = false;
-let overlayShown = false;
-
-// Fungsi untuk mencoba unlock audio dengan fake user interaction
-function tryUnlockAudioWithFakeInteraction() {
-    if (!audioElement || audioStarted) return;
-    
-    // Coba klik tombol hidden secara programmatic
-    const hiddenButton = document.getElementById('hidden-play-button');
-    if (hiddenButton) {
-        // Coba berbagai teknik untuk "mengklik" tombol
-        try {
-            // Teknik 1: Direct click
-            hiddenButton.click();
-        } catch (e) {
-            // Teknik 2: Create event dan dispatch
-            try {
-                const clickEvent = new MouseEvent('click', {
-                    bubbles: true,
-                    cancelable: true,
-                    view: window
-                });
-                hiddenButton.dispatchEvent(clickEvent);
-            } catch (e2) {
-                // Teknik 3: Focus dan Enter
-                try {
-                    hiddenButton.focus();
-                    const keyEvent = new KeyboardEvent('keydown', {
-                        key: 'Enter',
-                        code: 'Enter',
-                        bubbles: true
-                    });
-                    hiddenButton.dispatchEvent(keyEvent);
-                } catch (e3) {
-                    console.log('All fake interaction techniques failed');
-                }
-            }
-        }
-    }
-}
 
 // Fungsi untuk memutar audio dengan teknik muted autoplay
 function playAudioWithMutedTechnique() {
@@ -208,8 +169,6 @@ function playAudioWithMutedTechnique() {
                     if (audioElement && !audioElement.paused) {
                         audioElement.muted = false;
                         console.log('Audio started and unmuted successfully');
-                        // Sembunyikan overlay jika ada
-                        hideAudioOverlay();
                     }
                 }, 300);
             })
@@ -234,60 +193,7 @@ function playAudioWithMutedTechnique() {
                 audioElement.muted = false;
                 audioStarted = true;
                 audioUnlocked = true;
-                hideAudioOverlay();
             }
-        } catch (e) {
-            console.log('Error playing audio:', e);
-        }
-    }
-}
-
-// Fungsi untuk menampilkan overlay aktivasi audio
-function showAudioOverlay() {
-    if (overlayShown || audioStarted) return;
-    overlayShown = true;
-    const overlay = document.getElementById('audio-activation-overlay');
-    if (overlay) {
-        overlay.style.display = 'flex';
-        // Tambahkan animasi fade in
-        setTimeout(() => {
-            overlay.style.opacity = '1';
-        }, 10);
-    }
-}
-
-// Fungsi untuk menyembunyikan overlay
-function hideAudioOverlay() {
-    const overlay = document.getElementById('audio-activation-overlay');
-    if (overlay) {
-        overlay.style.display = 'none';
-    }
-}
-
-// Fungsi untuk mengaktifkan audio dari overlay
-function activateAudioFromOverlay() {
-    if (!audioElement) return;
-    
-    audioElement.muted = false;
-    audioElement.volume = 0.5;
-    
-    const playPromise = audioElement.play();
-    if (playPromise !== undefined) {
-        playPromise
-            .then(() => {
-                audioStarted = true;
-                audioUnlocked = true;
-                hideAudioOverlay();
-            })
-            .catch(error => {
-                console.log('Error activating audio:', error);
-            });
-    } else {
-        try {
-            audioElement.play();
-            audioStarted = true;
-            audioUnlocked = true;
-            hideAudioOverlay();
         } catch (e) {
             console.log('Error playing audio:', e);
         }
@@ -331,7 +237,6 @@ function attemptPlay() {
                 audioStarted = true;
                 audioUnlocked = true;
                 console.log('Background music started');
-                hideAudioOverlay();
             })
             .catch(error => {
                 // Autoplay mungkin diblokir, coba teknik muted autoplay
@@ -345,7 +250,6 @@ function attemptPlay() {
             audioElement.play();
             audioStarted = true;
             audioUnlocked = true;
-            hideAudioOverlay();
         } catch (e) {
             // Coba teknik muted autoplay jika gagal
             if (!audioStarted) {
@@ -436,22 +340,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
     
-    // Event listener untuk tombol activate audio
-    const activateBtn = document.getElementById('activate-audio-btn');
-    if (activateBtn) {
-        activateBtn.addEventListener('click', activateAudioFromOverlay);
-    }
-    
-    // Event listener untuk hidden button
-    const hiddenBtn = document.getElementById('hidden-play-button');
-    if (hiddenBtn) {
-        hiddenBtn.addEventListener('click', function() {
-            if (!audioStarted) {
-                activateAudioFromOverlay();
-            }
-        });
-    }
-    
     // Coba putar audio segera - beberapa kali dengan delay berbeda
     // Coba segera setelah DOM ready
     tryPlay();
@@ -461,21 +349,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(tryPlay, 30);
     setTimeout(tryPlay, 50);
     setTimeout(tryPlay, 100);
-    setTimeout(() => {
-        tryPlay();
-        // Coba fake interaction setelah 150ms
-        if (!audioStarted) {
-            tryUnlockAudioWithFakeInteraction();
-        }
-    }, 150);
+    setTimeout(tryPlay, 150);
     setTimeout(tryPlay, 200);
-    setTimeout(() => {
-        tryPlay();
-        // Coba fake interaction lagi
-        if (!audioStarted) {
-            tryUnlockAudioWithFakeInteraction();
-        }
-    }, 300);
+    setTimeout(tryPlay, 300);
     setTimeout(tryPlay, 400);
     setTimeout(tryPlay, 500);
     setTimeout(tryPlay, 700);
@@ -571,43 +447,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, 200); // Lebih sering retry (setiap 200ms)
     
-    // Fallback: jika masih belum berhasil setelah beberapa detik, tampilkan overlay
-    // Cek lebih cepat (1.5 detik) untuk memberikan feedback lebih cepat ke user
+    // Fallback: coba lagi dengan lebih agresif setelah beberapa detik
     setTimeout(function() {
         if (!audioStarted) {
-            // Coba fake interaction sekali lagi
-            tryUnlockAudioWithFakeInteraction();
-            
             // Coba play sekali lagi
             tryPlay();
         }
     }, 1500);
     
-    // Tampilkan overlay setelah 2 detik jika masih belum berhasil
+    // Coba lagi setelah 2 detik
     setTimeout(function() {
         if (!audioStarted) {
-            showAudioOverlay();
-            
-            // Tambahkan event listener sebagai fallback dengan lebih agresif
-            const fallbackHandler = function() {
-                if (!audioStarted) {
-                    tryPlay();
-                    hideAudioOverlay();
-                }
-            };
-            document.addEventListener('click', fallbackHandler, { once: true, passive: true });
-            document.addEventListener('touchstart', fallbackHandler, { once: true, passive: true });
-            document.addEventListener('touchend', fallbackHandler, { once: true, passive: true });
-            document.addEventListener('scroll', fallbackHandler, { once: true, passive: true });
-            document.addEventListener('mousedown', fallbackHandler, { once: true, passive: true });
-            document.addEventListener('keydown', fallbackHandler, { once: true, passive: true });
+            tryPlay();
         }
     }, 2000);
     
-    // Pastikan overlay ditampilkan setelah 3 detik jika masih belum berhasil
+    // Coba lagi setelah 3 detik
     setTimeout(function() {
-        if (!audioStarted && !overlayShown) {
-            showAudioOverlay();
+        if (!audioStarted) {
+            tryPlay();
         }
     }, 3000);
+    
+    // Tambahkan event listener untuk interaksi user sebagai fallback
+    const fallbackHandler = function() {
+        if (!audioStarted) {
+            tryPlay();
+        }
+    };
+    document.addEventListener('click', fallbackHandler, { once: true, passive: true });
+    document.addEventListener('touchstart', fallbackHandler, { once: true, passive: true });
+    document.addEventListener('touchend', fallbackHandler, { once: true, passive: true });
+    document.addEventListener('scroll', fallbackHandler, { once: true, passive: true });
+    document.addEventListener('mousedown', fallbackHandler, { once: true, passive: true });
+    document.addEventListener('keydown', fallbackHandler, { once: true, passive: true });
 });
