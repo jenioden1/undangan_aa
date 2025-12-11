@@ -129,65 +129,169 @@ document.addEventListener('DOMContentLoaded', function() {
 // Update nama tamu saat hash berubah (untuk navigasi tanpa reload)
 window.addEventListener('hashchange', displayGuestName);
 
-// Fungsi untuk memutar background music
+// Variabel global untuk tracking status audio
+let audioStarted = false;
+let audioElement = null;
+
+// Fungsi untuk memutar background music dengan retry mechanism
 function playBackgroundMusic() {
-    const audio = document.getElementById('background-music');
-    if (audio) {
-        audio.volume = 0.5; // Set volume ke 50% agar tidak terlalu keras
-        const playPromise = audio.play();
-        
-        // Handle promise jika browser memblokir autoplay
-        if (playPromise !== undefined) {
-            playPromise
-                .then(() => {
-                    // Audio berhasil diputar
-                    console.log('Background music started');
-                })
-                .catch(error => {
-                    // Autoplay diblokir, akan dicoba lagi saat user berinteraksi
-                    console.log('Autoplay blocked, will try again on user interaction');
-                });
+    if (!audioElement || audioStarted) return;
+    
+    // Set volume
+    audioElement.volume = 0.5; // Set volume ke 50% agar tidak terlalu keras
+    
+    // Coba putar langsung
+    attemptPlay();
+}
+
+function attemptPlay() {
+    if (!audioElement || audioStarted) return;
+    
+    // Pastikan audio sudah dimuat minimal sebagian
+    if (audioElement.readyState === 0) {
+        // Audio belum dimuat sama sekali, load dulu
+        audioElement.load();
+        // Coba lagi setelah load
+        setTimeout(() => attemptPlay(), 100);
+        return;
+    }
+    
+    // Coba putar dengan berbagai teknik
+    const playPromise = audioElement.play();
+    
+    if (playPromise !== undefined) {
+        playPromise
+            .then(() => {
+                // Audio berhasil diputar
+                audioStarted = true;
+                console.log('Background music started');
+            })
+            .catch(error => {
+                // Autoplay mungkin diblokir, coba lagi dengan teknik lain
+                console.log('Autoplay attempt failed, retrying...', error);
+                // Coba lagi setelah delay singkat
+                setTimeout(() => {
+                    if (!audioStarted) {
+                        attemptPlay();
+                    }
+                }, 200);
+            });
+    } else {
+        // Fallback untuk browser lama
+        try {
+            audioElement.play();
+            audioStarted = true;
+        } catch (e) {
+            console.log('Error playing audio:', e);
         }
     }
 }
 
-// Coba putar audio saat halaman dimuat
-document.addEventListener('DOMContentLoaded', function() {
-    const audio = document.getElementById('background-music');
+// Inisialisasi audio - coba segera setelah script dimuat
+(function initAudio() {
+    // Coba dapatkan audio element segera
+    audioElement = document.getElementById('background-music');
     
-    if (audio) {
+    if (audioElement) {
         // Pastikan audio akan looping
-        audio.loop = true;
+        audioElement.loop = true;
+        audioElement.volume = 0.5;
         
-        // Event listener untuk memastikan audio tetap looping jika berhenti
-        audio.addEventListener('ended', function() {
-            audio.currentTime = 0;
-            audio.play().catch(error => {
+        // Coba putar segera
+        attemptPlay();
+    }
+})();
+
+// Inisialisasi audio saat halaman dimuat
+document.addEventListener('DOMContentLoaded', function() {
+    audioElement = document.getElementById('background-music');
+    
+    if (!audioElement) return;
+    
+    // Pastikan audio akan looping
+    audioElement.loop = true;
+    audioElement.volume = 0.5;
+    
+    // Preload audio untuk memastikan siap diputar
+    audioElement.preload = 'auto';
+    
+    // Event listener untuk memastikan audio tetap looping jika berhenti (backup jika loop gagal)
+    audioElement.addEventListener('ended', function() {
+        if (audioElement && audioElement.loop) {
+            // Jika loop aktif tapi masih berhenti, restart manual
+            audioElement.currentTime = 0;
+            audioElement.play().catch(error => {
                 console.log('Error restarting music:', error);
             });
-        });
-        
-        // Coba putar audio langsung
-        playBackgroundMusic();
-        
-        // Jika autoplay diblokir, coba lagi saat user berinteraksi
-        let musicStarted = false;
-        const startMusicOnInteraction = function() {
-            if (!musicStarted) {
-                if (audio && audio.paused) {
-                    playBackgroundMusic();
-                    musicStarted = true;
-                    // Hapus event listener setelah musik mulai
-                    document.removeEventListener('click', startMusicOnInteraction);
-                    document.removeEventListener('scroll', startMusicOnInteraction);
-                    document.removeEventListener('touchstart', startMusicOnInteraction);
-                }
-            }
-        };
-        
-        // Coba putar saat user klik, scroll, atau touch
-        document.addEventListener('click', startMusicOnInteraction, { once: true });
-        document.addEventListener('scroll', startMusicOnInteraction, { once: true });
-        document.addEventListener('touchstart', startMusicOnInteraction, { once: true });
+        }
+    });
+    
+    // Event listener untuk error handling
+    audioElement.addEventListener('error', function(e) {
+        console.log('Audio error:', e);
+        // Coba reload audio jika error
+        if (audioElement) {
+            audioElement.load();
+            setTimeout(() => attemptPlay(), 500);
+        }
+    });
+    
+    // Coba putar audio segera - beberapa kali dengan delay berbeda
+    const tryPlay = function() {
+        if (!audioStarted) {
+            playBackgroundMusic();
+        }
+    };
+    
+    // Coba segera
+    tryPlay();
+    
+    // Coba lagi setelah 100ms
+    setTimeout(tryPlay, 100);
+    
+    // Coba lagi setelah 300ms
+    setTimeout(tryPlay, 300);
+    
+    // Coba lagi setelah 500ms
+    setTimeout(tryPlay, 500);
+    
+    // Tunggu audio dimuat jika belum siap
+    if (audioElement.readyState < 2) {
+        audioElement.addEventListener('canplay', tryPlay, { once: true });
+        audioElement.addEventListener('canplaythrough', tryPlay, { once: true });
+        audioElement.addEventListener('loadeddata', tryPlay, { once: true });
     }
+    
+    // Coba lagi saat page fully loaded
+    window.addEventListener('load', function() {
+        setTimeout(tryPlay, 100);
+        setTimeout(tryPlay, 500);
+    });
+    
+    // Retry mechanism: coba lagi setiap beberapa detik jika belum berhasil
+    let retryCount = 0;
+    const maxRetries = 15;
+    const retryInterval = setInterval(function() {
+        if (!audioStarted && retryCount < maxRetries) {
+            retryCount++;
+            tryPlay();
+        } else if (audioStarted) {
+            clearInterval(retryInterval);
+        }
+    }, 500);
+    
+    // Fallback: jika masih belum berhasil setelah beberapa detik, coba dengan interaksi
+    setTimeout(function() {
+        if (!audioStarted) {
+            // Tambahkan event listener sebagai fallback
+            const fallbackHandler = function() {
+                if (!audioStarted) {
+                    tryPlay();
+                }
+            };
+            document.addEventListener('click', fallbackHandler, { once: true, passive: true });
+            document.addEventListener('touchstart', fallbackHandler, { once: true, passive: true });
+            document.addEventListener('scroll', fallbackHandler, { once: true, passive: true });
+        }
+    }, 3000);
 });
