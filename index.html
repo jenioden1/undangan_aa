@@ -6,7 +6,8 @@
     <title>Undangan Pernikahan | Yuli & Eful</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lora:wght@400;600;700&family=Merriweather:wght@400;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lora:wght@400;600;700&family=Merriweather:wght@400;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lora:wght@400;600;700&family=Merriweather:wght@400;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -33,7 +34,7 @@
                     <div class="qr-section">
                         <p class="qr-title">SCAN MAPS DISINI</p>
                         <div class="qr-code-placeholder">
-                            <img src="barcode.png" alt="Barcode Lokasi" class="qr-code-img">
+                            <img src="barcode.png" alt="Barcode Lokasi" class="qr-code-img" loading="lazy">
                         </div>
                         <p class="qr-label">BARCODE LOKASI</p>
                     </div>
@@ -41,8 +42,8 @@
                 </div>
             </div>
             <!-- Dekorasi Floral Section Cover -->
-            <img src="section1-kiriatas.png" alt="Floral decoration" class="cover-floral-top-left">
-            <img src="section1-kananbawah.png" alt="Floral decoration" class="cover-floral-bottom-right">
+            <img src="section1-kiriatas.png" alt="Floral decoration" class="cover-floral-top-left" loading="lazy">
+            <img src="section1-kananbawah.png" alt="Floral decoration" class="cover-floral-bottom-right" loading="lazy">
         </div>
         <button class="scroll-down" onclick="scrollToDetail()">
             <span>↓</span>
@@ -113,9 +114,9 @@
             </div>
             
             <!-- Dekorasi Floral Section Detail -->
-            <img src="section2-atastengah.png" alt="Floral decoration" class="detail-floral-top-center">
-            <img src="section2-kananbawah.png" alt="Floral decoration" class="detail-floral-bottom-right">
-            <img src="section3-kiribawah.png" alt="Floral decoration" class="detail-floral-bottom-left">
+            <img src="section2-atastengah.png" alt="Floral decoration" class="detail-floral-top-center" loading="lazy">
+            <img src="section2-kananbawah.png" alt="Floral decoration" class="detail-floral-bottom-right" loading="lazy">
+            <img src="section3-kiribawah.png" alt="Floral decoration" class="detail-floral-bottom-left" loading="lazy">
         </div>
     </section>
 
@@ -128,7 +129,7 @@
                 
                 <div class="bank-info">
                     <div class="bank-logo-container">
-                        <img src="bnilogo.png" alt="Logo BNI" class="bank-logo">
+                        <img src="bnilogo.png" alt="Logo BNI" class="bank-logo" loading="lazy">
                     </div>
                     <div class="bank-details">
                         <p class="bank-name">Bank BNI</p>
@@ -143,11 +144,11 @@
     </section>
 
     <!-- Audio Background -->
-    <audio id="background-music" loop preload="auto" autoplay muted>
+    <audio id="background-music" loop preload="metadata" autoplay muted>
         <source src="lagu.mp3" type="audio/mpeg">
         Browser Anda tidak mendukung elemen audio.
     </audio>
 
-    <script src="script.js"></script>
+    <script src="script.js" defer></script>
 </body>
 </html>
