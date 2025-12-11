@@ -609,3 +609,95 @@ document.addEventListener('DOMContentLoaded', function() {
     // Coba saat window load (sekali)
     window.addEventListener('load', tryImmediatePlay, { once: true });
 })();
+
+// ========== TOMBOL PLAY/PAUSE MUSIK ==========
+function initMusicToggleButton() {
+    const musicBtn = document.getElementById('music-toggle-btn');
+    const playIcon = musicBtn?.querySelector('.play-icon');
+    const pauseIcon = musicBtn?.querySelector('.pause-icon');
+    
+    if (!musicBtn || !audioElement) return;
+    
+    // Fungsi untuk update icon tombol
+    function updateButtonIcon(isPlaying) {
+        if (playIcon && pauseIcon) {
+            if (isPlaying) {
+                playIcon.style.display = 'none';
+                pauseIcon.style.display = 'flex';
+                musicBtn.classList.add('playing');
+            } else {
+                playIcon.style.display = 'flex';
+                pauseIcon.style.display = 'none';
+                musicBtn.classList.remove('playing');
+            }
+        }
+    }
+    
+    // Fungsi untuk toggle play/pause
+    function toggleMusic() {
+        if (!audioElement) return;
+        
+        if (audioElement.paused) {
+            // Play musik
+            audioElement.muted = false;
+            const playPromise = audioElement.play();
+            
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        audioStarted = true;
+                        updateButtonIcon(true);
+                    })
+                    .catch(error => {
+                        console.log('Error playing music:', error);
+                    });
+            } else {
+                audioElement.play();
+                audioStarted = true;
+                updateButtonIcon(true);
+            }
+        } else {
+            // Pause musik
+            audioElement.pause();
+            updateButtonIcon(false);
+        }
+    }
+    
+    // Event listener untuk tombol
+    musicBtn.addEventListener('click', toggleMusic);
+    
+    // Update icon berdasarkan status audio
+    function checkAudioStatus() {
+        if (audioElement) {
+            updateButtonIcon(!audioElement.paused && !audioElement.muted);
+        }
+    }
+    
+    // Check status saat audio events
+    audioElement.addEventListener('play', () => {
+        if (!audioElement.muted) {
+            updateButtonIcon(true);
+        }
+    });
+    
+    audioElement.addEventListener('pause', () => {
+        updateButtonIcon(false);
+    });
+    
+    // Check status secara berkala (untuk handle autoplay)
+    setInterval(checkAudioStatus, 500);
+    
+    // Initial check
+    setTimeout(checkAudioStatus, 1000);
+}
+
+// Inisialisasi tombol saat DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Tunggu audio element ready
+    setTimeout(initMusicToggleButton, 500);
+});
+
+// Juga coba saat window load
+window.addEventListener('load', function() {
+    setTimeout(initMusicToggleButton, 300);
+});
