@@ -202,7 +202,7 @@ function playAudioWithMutedTechnique() {
     if (audioElement.readyState === 0) {
         audioElement.load();
         // Tunggu sedikit lalu coba lagi
-        setTimeout(() => playAudioWithMutedTechnique(), 50);
+        setTimeout(() => playAudioWithMutedTechnique(), 30);
         return;
     }
     
@@ -225,6 +225,26 @@ function playAudioWithMutedTechnique() {
         audioElement.playbackRate = 1.0;
     } catch (e) {
         // Ignore
+    }
+    
+    // Teknik 5: Pastikan autoplay attribute aktif
+    audioElement.setAttribute('autoplay', '');
+    
+    // Teknik 6: Coba play langsung tanpa promise dulu (untuk browser lama)
+    try {
+        audioElement.play();
+        if (!audioElement.paused) {
+            audioStarted = true;
+            audioUnlocked = true;
+            setTimeout(() => {
+                if (audioElement) {
+                    audioElement.muted = false;
+                }
+            }, 100);
+            return;
+        }
+    } catch (e) {
+        // Continue dengan promise method
     }
     
     // Coba play dengan beberapa teknik sekaligus
@@ -367,54 +387,55 @@ function attemptPlay() {
     // Unlock AudioContext segera (sebelum DOM ready)
     unlockAudioContext();
     
-    // Simulate user interaction segera
-    setTimeout(() => {
-        simulateUserInteraction();
-    }, 10);
+    // Simulate user interaction segera - beberapa kali
+    simulateUserInteraction();
+    setTimeout(() => simulateUserInteraction(), 10);
+    setTimeout(() => simulateUserInteraction(), 50);
+    
+    // Fungsi untuk inisialisasi audio element
+    function initAudioElement() {
+        if (!audioElement) {
+            audioElement = document.getElementById('background-music');
+        }
+        
+        if (audioElement && !audioStarted) {
+            // Set properties
+            audioElement.loop = true;
+            audioElement.volume = 0.5;
+            audioElement.muted = true; // Pastikan muted untuk autoplay
+            audioElement.setAttribute('autoplay', '');
+            
+            // Unlock dan simulate
+            unlockAudioContext();
+            simulateUserInteraction();
+            
+            // Coba play langsung dengan teknik muted autoplay
+            playAudioWithMutedTechnique();
+        }
+    }
     
     // Coba dapatkan audio element segera
     if (document.readyState === 'loading') {
         // DOM belum siap, tunggu dulu
         document.addEventListener('DOMContentLoaded', function() {
-            audioElement = document.getElementById('background-music');
-            if (audioElement) {
-                audioElement.loop = true;
-                audioElement.volume = 0.5;
-                // Unlock lagi setelah DOM ready
-                unlockAudioContext();
-                simulateUserInteraction();
-                // Coba dengan teknik muted autoplay
-                playAudioWithMutedTechnique();
-            }
+            initAudioElement();
+            // Coba lagi setelah delay singkat
+            setTimeout(initAudioElement, 10);
+            setTimeout(initAudioElement, 50);
         });
     } else {
         // DOM sudah siap
-        audioElement = document.getElementById('background-music');
-        if (audioElement) {
-            audioElement.loop = true;
-            audioElement.volume = 0.5;
-            // Unlock lagi
-            unlockAudioContext();
-            simulateUserInteraction();
-            // Coba dengan teknik muted autoplay
-            playAudioWithMutedTechnique();
-        }
+        initAudioElement();
+        // Coba lagi setelah delay singkat
+        setTimeout(initAudioElement, 10);
+        setTimeout(initAudioElement, 50);
     }
     
     // Juga coba saat window load
     window.addEventListener('load', function() {
-        if (!audioElement) {
-            audioElement = document.getElementById('background-music');
-        }
-        if (audioElement && !audioStarted) {
-            audioElement.loop = true;
-            audioElement.volume = 0.5;
-            // Unlock lagi saat load
-            unlockAudioContext();
-            simulateUserInteraction();
-            // Coba dengan teknik muted autoplay
-            playAudioWithMutedTechnique();
-        }
+        initAudioElement();
+        setTimeout(initAudioElement, 10);
+        setTimeout(initAudioElement, 100);
     });
     
     // Teknik tambahan: Coba unlock saat page visibility berubah
@@ -422,8 +443,20 @@ function attemptPlay() {
         if (!document.hidden && !audioStarted) {
             unlockAudioContext();
             simulateUserInteraction();
+            initAudioElement();
         }
     });
+    
+    // Coba init setiap beberapa ms sampai berhasil
+    let initAttempts = 0;
+    const initInterval = setInterval(function() {
+        if (!audioStarted && initAttempts < 20) {
+            initAttempts++;
+            initAudioElement();
+        } else if (audioStarted) {
+            clearInterval(initInterval);
+        }
+    }, 100);
 })();
 
 // Inisialisasi audio saat halaman dimuat
@@ -432,22 +465,42 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (!audioElement) return;
     
-    // Unlock AudioContext segera setelah DOM ready
+    // Unlock AudioContext segera setelah DOM ready - beberapa kali
     unlockAudioContext();
+    setTimeout(() => unlockAudioContext(), 10);
+    setTimeout(() => unlockAudioContext(), 50);
+    
+    // Simulate user interaction - beberapa kali
     simulateUserInteraction();
+    setTimeout(() => simulateUserInteraction(), 10);
+    setTimeout(() => simulateUserInteraction(), 50);
     
     // Pastikan audio akan looping
     audioElement.loop = true;
     audioElement.volume = 0.5;
+    audioElement.muted = true; // Pastikan muted untuk autoplay
+    audioElement.setAttribute('autoplay', '');
     
     // Preload audio untuk memastikan siap diputar
     audioElement.preload = 'auto';
+    
+    // Coba play segera - beberapa kali dengan teknik berbeda
+    playAudioWithMutedTechnique();
     
     // Teknik: Coba play dengan requestAnimationFrame (kadang lebih berhasil)
     requestAnimationFrame(() => {
         if (!audioStarted && audioElement) {
             playAudioWithMutedTechnique();
         }
+    });
+    
+    // Coba lagi setelah beberapa frame
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            if (!audioStarted && audioElement) {
+                playAudioWithMutedTechnique();
+            }
+        });
     });
     
     // Event listener untuk memastikan audio tetap looping jika berhenti (backup jika loop gagal)
@@ -465,9 +518,15 @@ document.addEventListener('DOMContentLoaded', function() {
     audioElement.addEventListener('error', function(e) {
         console.log('Audio error:', e);
         // Coba reload audio jika error
-        if (audioElement) {
+        if (audioElement && !audioStarted) {
             audioElement.load();
-            setTimeout(() => attemptPlay(), 500);
+            unlockAudioContext();
+            simulateUserInteraction();
+            setTimeout(() => {
+                if (!audioStarted) {
+                    playAudioWithMutedTechnique();
+                }
+            }, 200);
         }
     });
     
@@ -666,3 +725,47 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('mousedown', fallbackHandler, { once: true, passive: true });
     document.addEventListener('keydown', fallbackHandler, { once: true, passive: true });
 });
+
+// Inisialisasi langsung - coba play audio segera setelah script dimuat
+(function immediateInit() {
+    // Unlock segera
+    unlockAudioContext();
+    simulateUserInteraction();
+    
+    // Coba dapatkan audio element dan play langsung
+    function tryImmediatePlay() {
+        if (!audioElement) {
+            audioElement = document.getElementById('background-music');
+        }
+        
+        if (audioElement && !audioStarted) {
+            audioElement.loop = true;
+            audioElement.volume = 0.5;
+            audioElement.muted = true;
+            audioElement.setAttribute('autoplay', '');
+            
+            unlockAudioContext();
+            simulateUserInteraction();
+            playAudioWithMutedTechnique();
+        }
+    }
+    
+    // Coba segera
+    tryImmediatePlay();
+    
+    // Coba lagi setelah delay singkat
+    setTimeout(tryImmediatePlay, 10);
+    setTimeout(tryImmediatePlay, 50);
+    setTimeout(tryImmediatePlay, 100);
+    setTimeout(tryImmediatePlay, 200);
+    setTimeout(tryImmediatePlay, 500);
+    
+    // Coba saat window load
+    if (window.addEventListener) {
+        window.addEventListener('load', function() {
+            tryImmediatePlay();
+            setTimeout(tryImmediatePlay, 10);
+            setTimeout(tryImmediatePlay, 50);
+        });
+    }
+})();
